@@ -429,8 +429,12 @@ func (storage *PublishedStorage) FileExists(path string) (bool, error) {
 	_, err := storage.s3.HeadObject(params)
 	if err != nil {
 		aerr, ok := err.(awserr.Error)
-		if ok && aerr.Code() == s3.ErrCodeNoSuchKey {
-			return false, nil
+		if ok {
+			if aerr.Code() == s3.ErrCodeNoSuchKey {
+				return false, nil
+			}
+			return false, fmt.Errorf("S3 FileExists DEBUG: %s %s %s",
+				aerr.Code(), aerr.Message(), aerr.OrigErr())
 		}
 
 		return false, err
